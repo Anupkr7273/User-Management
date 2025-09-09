@@ -1,26 +1,20 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 
-// @desc   Get all users
-// @route  GET /api/users
-// @access Private
 export const getUsers = async (req, res) => {
   try {
     const users = await User.find().select("-password");
     res.json(users);
   } catch (error) {
-    console.error("Get Users Error:", error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Failed to fetch users:", error);
+    res.status(500).json({ message: "Couldn't get users" });
   }
 };
 
-// @desc   Get user by ID
-// @route  GET /api/users/:id
-// @access Private
 export const getUserById = async (req, res) => {
   try {
     if (req.user.role !== "admin" && req.user._id.toString() !== req.params.id) {
-      return res.status(403).json({ message: "Access denied" });
+      return res.status(403).json({ message: "Not allowed" });
     }
 
     const user = await User.findById(req.params.id).select("-password");
@@ -28,31 +22,28 @@ export const getUserById = async (req, res) => {
 
     res.json(user);
   } catch (error) {
-    console.error("Get User Error:", error);
-    res.status(500).json({ message: "Server error" });
+    console.error("User fetch error:", error);
+    res.status(500).json({ message: "Something went wrong" });
   }
 };
 
-
-// @desc   Update user
-// @route  PUT /api/users/:id
-// @access Private
 export const updateUser = async (req, res) => {
   try {
     if (req.user.role !== "admin" && req.user._id.toString() !== req.params.id) {
-      return res.status(403).json({ message: "Access denied" });
+      return res.status(403).json({ message: "Not allowed" });
     }
 
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
     let user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
     user.name = name || user.name;
     user.email = email || user.email;
+    user.role = role || user.role;
 
     if (password) {
-      const salt = await bcrypt.genSalt(Number(process.env.BCRYPT_SALT_ROUNDS) || 10);
+      const salt = await bcrypt.genSalt(10);
       user.password = await bcrypt.hash(password, salt);
     }
 
@@ -64,23 +55,20 @@ export const updateUser = async (req, res) => {
       role: updatedUser.role,
     });
   } catch (error) {
-    console.error("Update User Error:", error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Update failed:", error);
+    res.status(500).json({ message: "Update didn't work" });
   }
 };
 
-// @desc   Delete user
-// @route  DELETE /api/users/:id
-// @access Private
 export const deleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
     await user.deleteOne();
-    res.json({ message: "User deleted successfully" });
+    res.json({ message: "User removed" });
   } catch (error) {
-    console.error("Delete User Error:", error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Delete error:", error);
+    res.status(500).json({ message: "Couldn't delete user" });
   }
 };

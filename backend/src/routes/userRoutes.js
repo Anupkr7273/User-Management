@@ -4,10 +4,9 @@ import { protect, adminonly } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// all routes protected for now
-router.get("/", protect,adminonly, getUsers);
+router.get("/", protect, adminonly, getUsers);
 router.get("/:id", protect, getUserById);
 router.put("/:id", protect, updateUser);
-router.delete("/:id", protect,adminonly, deleteUser);
+router.delete("/:id", protect, adminonly, deleteUser);
 
 export default router;

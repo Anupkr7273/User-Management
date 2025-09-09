@@ -4,19 +4,18 @@ const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "Name is required"],
+      required: true,
       trim: true,
       minlength: 2,
     },
     email: {
       type: String,
-      required: [true, "Email is required"],
+      required: true,
       unique: true,
-      match: [/^\S+@\S+\.\S+$/, "Please enter a valid email"],
     },
     password: {
       type: String,
-      required: [true, "Password is required"],
+      required: true,
       minlength: 6,
     },
     role: {
@@ -27,7 +26,6 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
 
 const User = mongoose.model("User", userSchema);
 export default User;
